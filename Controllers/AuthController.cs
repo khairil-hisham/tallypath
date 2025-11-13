@@ -13,11 +13,18 @@ namespace LoginApi.Controllers
     [Route("/")]
     public class LandingController : ControllerBase
     {
+        private readonly IWebHostEnvironment _env;
+
+        public LandingController(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
-            // "index.html" must be in wwwroot
-            return PhysicalFile("wwwroot/index.html", "text/html");
+            var filePath = Path.Combine(_env.WebRootPath, "index.html");
+            return PhysicalFile(filePath, "text/html");
         }
     }
 
