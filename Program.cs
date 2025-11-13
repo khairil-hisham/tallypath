@@ -46,6 +46,10 @@ app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader());
 
+//simple landing page
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
+
 app.MapControllers();
 
 app.Run();
