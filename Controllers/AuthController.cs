@@ -10,7 +10,7 @@ using BCrypt.Net;
 namespace LoginApi.Controllers
 {
     [ApiController]
-    [Route('/')]
+    [Route("/")]
     public class LandingController : ControllerBase
     {
         [HttpGet]
