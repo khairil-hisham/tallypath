@@ -10,6 +10,18 @@ using BCrypt.Net;
 namespace LoginApi.Controllers
 {
     [ApiController]
+    [Route('/')]
+    public class LandingController : ControllerBase
+    {
+        [HttpGet]
+        public IActionResult Index()
+        {
+            // "index.html" must be in wwwroot
+            return PhysicalFile("wwwroot/index.html", "text/html");
+        }
+    }
+
+
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {

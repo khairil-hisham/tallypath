@@ -41,14 +41,13 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStaticFiles();
+
 app.UseCors(x => x
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
 
-//simple landing page
-app.UseStaticFiles();
-app.MapFallbackToFile("index.html");
 
 app.MapControllers();
 
