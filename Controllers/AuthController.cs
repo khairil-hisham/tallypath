@@ -47,6 +47,9 @@ namespace LoginApi.Controllers
             if (_context.Users.Any(u => u.Username == dto.Username))
                 return BadRequest("Username already exists");
 
+            if (_context.Users.Any(u => u.Email == dto.Email))
+                return BadRequest("Email already exists");
+
             var user = new User
             {
                 Username = dto.Username,
