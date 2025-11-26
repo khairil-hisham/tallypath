@@ -6,6 +6,7 @@ using Tallypath.Data;
 using Tallypath.Models;
 using BCrypt.Net;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // PostgreSQL + EF
@@ -37,6 +38,12 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
