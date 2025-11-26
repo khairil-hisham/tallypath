@@ -16,5 +16,8 @@ namespace Tallypath.Models
         [Phone] public string Mobile { get; set; } = "";
         public string Dob { get; set; } = "";
 
+        public ICollection<GroupMember> GroupMemberships { get; set; } = new List<GroupMember>();
+        public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+
     }
 }
