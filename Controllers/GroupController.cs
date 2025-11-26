@@ -1,5 +1,6 @@
 
-
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tallypath.Data;
@@ -16,6 +17,7 @@ public class GroupsController : ControllerBase
         _context = context;
     }
 
+    [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
     {
@@ -38,13 +40,13 @@ public class GroupsController : ControllerBase
             Members = new List<GroupMember>()
         };
 
-        // 4. Add group members
+        // 4. Add other group members
         foreach (var userId in request.MemberIds)
         {
             group.Members.Add(new GroupMember
             {
                 UserId = userId,
-                IsAdmin = true,
+                IsAdmin = (userId == request.MemberIds[0]) ? true : false //first ID is admin
             });
         }
 
