@@ -43,7 +43,8 @@ public class GroupsController : ControllerBase
         {
             group.Members.Add(new GroupMember
             {
-                UserId = userId
+                UserId = userId,
+                IsAdmin = true,
             });
         }
 
