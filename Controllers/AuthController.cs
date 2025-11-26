@@ -8,7 +8,7 @@ using Tallypath.Models;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
 
-namespace LoginApi.Controllers
+namespace AuthApi.Controllers
 {
     [ApiController]
     [Route("/")]
@@ -55,7 +55,7 @@ namespace LoginApi.Controllers
             {
                 Username = dto.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = dto.FullName,
+                Fullname = dto.Fullname,
                 Email = dto.Email,
                 Mobile = dto.Mobile,
                 Dob = dto.Dob
@@ -94,7 +94,7 @@ namespace LoginApi.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim("email", user.Email),
-                    new Claim("fullname", user.FullName)
+                    new Claim("fullname", user.Fullname)
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 Issuer = _config["Jwt:Issuer"],
@@ -106,7 +106,7 @@ namespace LoginApi.Controllers
             return Ok(new
             {
                 Token = tokenHandler.WriteToken(token),
-                User = new { user.Id, user.Username, user.FullName, user.Email, user.Mobile, user.Dob }
+                User = new { user.Id, user.Username, user.Fullname, user.Email, user.Mobile, user.Dob }
             });
         }
 
