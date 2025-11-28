@@ -47,7 +47,7 @@ public class GroupsController : ControllerBase
         group.JoinCode = GenerateRandomCode();
         await _context.SaveChangesAsync();
 
-        return Ok(new { group.JoinCode });
+        return Ok(new { group.Id, group.Name, group.JoinCode});
     }
 
     [Authorize]
