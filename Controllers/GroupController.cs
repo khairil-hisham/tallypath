@@ -17,6 +17,39 @@ public class GroupsController : ControllerBase
         _context = context;
     }
 
+    private string GenerateRandomCode(int length = 6)
+    {
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[new Random().Next(s.Length)]).ToArray());
+    }
+
+    // ADMIN : Generate join code
+    [Authorize]
+    [HttpPost("{groupId}/generate-code")]
+    public async Task<IActionResult> GenerateJoinCode(int groupId)
+    {
+        var userId = User.GetUserId();
+
+        var membership = await _context.GroupMembers
+            .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
+
+        if (membership == null)
+            return Unauthorized("You are not in this group.");
+
+        if (!membership.IsAdmin)
+            return Forbid("Only admins can generate join codes.");
+
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null)
+            return NotFound();
+
+        group.JoinCode = GenerateRandomCode();
+        await _context.SaveChangesAsync();
+
+        return Ok(new { group.JoinCode });
+    }
+
     [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)

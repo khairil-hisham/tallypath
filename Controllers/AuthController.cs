@@ -115,7 +115,7 @@ namespace AuthApi.Controllers
         public IActionResult Me()
         {
             var username = User.Identity?.Name;
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.GetUserId();
             return Ok(new { Username = username, UserId = userId });
         }
     }

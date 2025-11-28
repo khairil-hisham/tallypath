@@ -6,6 +6,8 @@ namespace Tallypath.Models
 
         public string Name { get; set; } = default!;
 
+        public string? JoinCode { get; set; }
+
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
     }
