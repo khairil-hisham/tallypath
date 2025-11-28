@@ -70,7 +70,8 @@ public class GroupsController : ControllerBase
         var group = new Group
         {
             Name = request.Name,
-            Members = new List<GroupMember>()
+            Members = new List<GroupMember>(),
+            JoinCode = GenerateRandomCode()
         };
 
         // 4. Add other group members
@@ -92,7 +93,8 @@ public class GroupsController : ControllerBase
         {
             group.Id,
             group.Name,
-            Members = group.Members.Select(m => m.UserId).ToList()
+            Members = group.Members.Select(m => m.UserId).ToList(),
+            group.JoinCode,
         });
     }
 }
