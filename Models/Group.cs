@@ -6,11 +6,23 @@ namespace Tallypath.Models
 
         public string Name { get; set; } = default!;
 
-        public string? JoinCode { get; set; }
-
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
     }
+    public class GroupInvite
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+
+        public int GroupId { get; set; }
+        public Group Group { get; set; } = default!;
+
+        public DateTime ExpiresAt { get; set; }
+        public int MaxUses { get; set; } = 1;  // optional
+        public int Uses { get; set; } = 0;
+
+        public bool IsRevoked { get; set; } = false;
+    }
+
 
     public class GroupMember
     {

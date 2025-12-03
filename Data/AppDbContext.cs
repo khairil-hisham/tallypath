@@ -10,6 +10,7 @@ namespace Tallypath.Data
         public DbSet<Group> Groups => Set<Group>();
         public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
         public DbSet<Expense> Expenses => Set<Expense>();
+        public DbSet<GroupInvite> GroupInvites=> Set<GroupInvite>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
