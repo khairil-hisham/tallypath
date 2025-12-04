@@ -1,184 +1,186 @@
-
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tallypath.Data;
 using Tallypath.Models;
 
-[ApiController]
-[Route("api/[controller]")]
-public class GroupsController : ControllerBase
+namespace Tallypath.Controllers
 {
-    private readonly AppDbContext _context;
-
-    public GroupsController(AppDbContext context)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GroupsController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
 
-    [Authorize]
-    [HttpPost("{groupId}/invites")]
-    public async Task<IActionResult> CreateInvite(int groupId)
-    {
-        var userId = User.GetUserId();
-
-        var membership = await _context.GroupMembers
-            .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
-
-        if (membership == null || !membership.IsAdmin)
-            return Forbid();
-
-        var invite = new GroupInvite
+        public GroupsController(AppDbContext context)
         {
-            GroupId = groupId,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            MaxUses = 5
-        };
+            _context = context;
+        }
 
-        _context.GroupInvites.Add(invite);
-        await _context.SaveChangesAsync();
-
-        var link = $"https://tallypath.my/invite?token={invite.Id}";
-
-        return Ok(new
+        [Authorize]
+        [HttpPost("{groupId}/invites")]
+        public async Task<IActionResult> CreateInvite(Guid groupId)
         {
-            inviteId = invite.Id,
-            deepLink = link,
-            expiresAt = invite.ExpiresAt
-        });
-    }
+            var userId = User.GetUserId();
 
+            var membership = await _context.GroupMembers
+                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
 
-    [Authorize]
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
-    {
-        // 1. Validate group name
-        if (string.IsNullOrWhiteSpace(request.Name))
-            return BadRequest("Group name is required.");
+            if (membership == null || !membership.IsAdmin)
+                return Forbid();
 
-        // 2. Make sure members exist
-        var users = await _context.Users
-            .Where(u => request.MemberIds.Contains(u.Id))
-            .ToListAsync();
-
-        if (users.Count != request.MemberIds.Count)
-            return BadRequest("One or more user IDs are invalid.");
-
-        // 3. Create group
-        var group = new Group
-        {
-            Name = request.Name,
-            Members = new List<GroupMember>(),
-        };
-
-
-        // 4. Add other group members
-        foreach (var userId in request.MemberIds)
-        {
-            group.Members.Add(new GroupMember
+            var invite = new GroupInvite
             {
-                UserId = userId,
-                IsAdmin = (userId == request.MemberIds[0]) ? true : false //first ID is admin
+                GroupId = groupId,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                MaxUses = 5
+            };
+
+            _context.GroupInvites.Add(invite);
+            await _context.SaveChangesAsync();
+
+            var link = $"https://tallypath.my/invite?token={invite.Id}";
+
+            return Ok(new
+            {
+                inviteId = invite.Id,
+                deepLink = link,
+                expiresAt = invite.ExpiresAt
             });
         }
 
-        // 5. Save to DB
-        _context.Groups.Add(group);
-        await _context.SaveChangesAsync();
 
-        //create an invite code
-        var invite = new GroupInvite
+        [Authorize]
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
-            GroupId = group.Id,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            MaxUses = 5
-        };
+            // 1. Validate group name
+            if (string.IsNullOrWhiteSpace(request.Name))
+                return BadRequest("Group name is required.");
 
-        _context.GroupInvites.Add(invite);
-        await _context.SaveChangesAsync();
+            // 2. Make sure members exist
+            var users = await _context.Users
+                .Where(u => request.MemberIds.Contains(u.Id))
+                .ToListAsync();
 
-        var link = $"https://tallypath.my/invite?token={invite.Id}";
+            if (users.Count != request.MemberIds.Count)
+                return BadRequest("One or more user IDs are invalid.");
 
-        // 6. Return new group info
-        return Ok(new
+            // 3. Create group
+            var group = new Group
+            {
+                Name = request.Name,
+                Members = new List<GroupMember>(),
+            };
+
+
+            // 4. Add other group members
+            foreach (var userId in request.MemberIds)
+            {
+                group.Members.Add(new GroupMember
+                {
+                    UserId = userId,
+                    IsAdmin = (userId == request.MemberIds[0]) ? true : false //first ID is admin
+                });
+            }
+
+            // 5. Save to DB
+            _context.Groups.Add(group);
+            await _context.SaveChangesAsync();
+
+            //create an invite code
+            var invite = new GroupInvite
+            {
+                GroupId = group.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                MaxUses = 5
+            };
+
+            _context.GroupInvites.Add(invite);
+            await _context.SaveChangesAsync();
+
+            var link = $"https://tallypath.my/invite?token={invite.Id}";
+
+            // 6. Return new group info
+            return Ok(new
+            {
+                group.Id,
+                group.Name,
+                Members = group.Members.Select(m => m.UserId).ToList(),
+                inviteCode = invite.Id,
+                deepLink = link,
+                expiresAt = invite.ExpiresAt
+            });
+        }
+
+
+        [Authorize]
+        [HttpPost("join/{inviteId}")]
+        public async Task<IActionResult> JoinGroupViaInvite(Guid inviteId)
         {
-            group.Id,
-            group.Name,
-            Members = group.Members.Select(m => m.UserId).ToList(),
-            inviteCode = invite.Id,
-            deepLink = link,
-            expiresAt = invite.ExpiresAt
-        });
-    }
+            var userId = User.GetUserId();
 
+            var invite = await _context.GroupInvites
+                .Include(i => i.Group)
+                .ThenInclude(g => g.Members)
+                .FirstOrDefaultAsync(i => i.Id == inviteId);
 
-    [Authorize]
-    [HttpPost("join/{inviteId}")]
-    public async Task<IActionResult> JoinGroupViaInvite(Guid inviteId)
-    {
-        var userId = User.GetUserId();
+            if (invite == null)
+                return NotFound("Invite does not exist.");
 
-        var invite = await _context.GroupInvites
-            .Include(i => i.Group)
-            .ThenInclude(g => g.Members)
-            .FirstOrDefaultAsync(i => i.Id == inviteId);
+            if (invite.IsRevoked)
+                return BadRequest("This invite has been revoked.");
 
-        if (invite == null)
-            return NotFound("Invite does not exist.");
+            if (invite.Uses >= invite.MaxUses)
+                return BadRequest("This invite has reached max uses.");
 
-        if (invite.IsRevoked)
-            return BadRequest("This invite has been revoked.");
+            if (invite.ExpiresAt < DateTime.UtcNow)
+                return BadRequest("This invite has expired.");
 
-        if (invite.Uses >= invite.MaxUses)
-            return BadRequest("This invite has reached max uses.");
+            if (invite.Group.Members.Any(m => m.UserId == userId))
+                return BadRequest("You are already a member of this group.");
 
-        if (invite.ExpiresAt < DateTime.UtcNow)
-            return BadRequest("This invite has expired.");
+            invite.Group.Members.Add(new GroupMember
+            {
+                GroupId = invite.GroupId,
+                UserId = userId
+            });
 
-        if (invite.Group.Members.Any(m => m.UserId == userId))
-            return BadRequest("You are already a member of this group.");
+            invite.Uses += 1;
 
-        invite.Group.Members.Add(new GroupMember
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Joined group successfully",
+                groupId = invite.GroupId,
+                groupName = invite.Group.Name
+            });
+        }
+
+        [Authorize]
+        [HttpPost("{groupId}/invites/{inviteId}/revoke")]
+        public async Task<IActionResult> RevokeInvite(Guid groupId, Guid inviteId)
         {
-            GroupId = invite.GroupId,
-            UserId = userId
-        });
+            var userId = User.GetUserId();
 
-        invite.Uses += 1;
+            var membership = await _context.GroupMembers
+                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
 
-        await _context.SaveChangesAsync();
+            if (membership == null || !membership.IsAdmin)
+                return Forbid();
 
-        return Ok(new
-        {
-            message = "Joined group successfully",
-            groupId = invite.GroupId,
-            groupName = invite.Group.Name
-        });
-    }
+            var invite = await _context.GroupInvites.FindAsync(inviteId);
 
-    [Authorize]
-    [HttpPost("{groupId}/invites/{inviteId}/revoke")]
-    public async Task<IActionResult> RevokeInvite(int groupId, Guid inviteId)
-    {
-        var userId = User.GetUserId();
+            if (invite == null)
+                return NotFound();
 
-        var membership = await _context.GroupMembers
-            .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
+            invite.IsRevoked = true;
+            await _context.SaveChangesAsync();
 
-        if (membership == null || !membership.IsAdmin)
-            return Forbid();
+            return Ok("Invite revoked.");
+        }
 
-        var invite = await _context.GroupInvites.FindAsync(inviteId);
-
-        if (invite == null)
-            return NotFound();
-
-        invite.IsRevoked = true;
-        await _context.SaveChangesAsync();
-
-        return Ok("Invite revoked.");
     }
 
 }

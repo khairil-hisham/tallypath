@@ -8,7 +8,7 @@ using Tallypath.Models;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
 
-namespace AuthApi.Controllers
+namespace Tallypath.Controllers
 {
     [ApiController]
     [Route("/")]

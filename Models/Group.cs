@@ -2,7 +2,7 @@ namespace Tallypath.Models
 {
     public class Group
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string Name { get; set; } = default!;
 
@@ -13,7 +13,7 @@ namespace Tallypath.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public int GroupId { get; set; }
+        public Guid GroupId { get; set; } = default!;
         public Group Group { get; set; } = default!;
 
         public DateTime ExpiresAt { get; set; }
@@ -26,9 +26,9 @@ namespace Tallypath.Models
 
     public class GroupMember
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = default!;
 
-        public int GroupId { get; set; }
+        public Guid GroupId { get; set; } = default!;
         public Group Group { get; set; } = default!;
 
         public Guid UserId { get; set; }
@@ -38,17 +38,5 @@ namespace Tallypath.Models
         public bool IsAdmin { get; set; } = false;
     }
 
-    public class Expense
-    {
-        public int Id { get; set; }
 
-        public int GroupId { get; set; }
-        public Group Group { get; set; } = default!;
-
-        public Guid CreatorId { get; set; }
-        public User Creator { get; set; } = default!;
-
-        public string Content { get; set; } = default!;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    }
 }
