@@ -1,4 +1,4 @@
-namespace Tallypath.Models
+namespace Tallypath.Data
 {
     public class RegisterDto
     {
