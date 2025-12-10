@@ -34,8 +34,9 @@ namespace Tallypath.Controllers
             var exp = new Expense
             {
                 GroupId = dto.GroupId,
-                Content = dto.Content,
-                CreatorId = userId
+                Title = dto.Title,
+                CreatorId = userId,
+                Amount = dto.Amount
             };
 
             _db.Expenses.Add(exp);
@@ -57,12 +58,35 @@ namespace Tallypath.Controllers
 
             var query = _db.Expenses
                 .Where(m => m.GroupId == groupId)
-                .OrderByDescending(m => m.CreatedAt);
+                .OrderByDescending(m => m.CreatedAt);//latest [0] to oldest [n]
 
             if (before != null)
                 query = (IOrderedQueryable<Expense>)query.Where(m => m.CreatedAt < before);
 
             var list = await query.Take(limit).ToListAsync();
+
+            return Ok(list);
+        }
+
+        [HttpGet("after/group/{groupId}")]
+        public async Task<IActionResult> GetExpensesAfter(Guid groupId, DateTime? after)
+        {
+            var userId = User.GetUserId();
+
+            bool isMember = await _db.GroupMembers
+                .AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
+
+            if (!isMember)
+                return Forbid();
+
+            var query = _db.Expenses
+                .Where(m => m.GroupId == groupId)
+                .OrderByDescending(m => m.CreatedAt);//latest [0] to oldest [n]
+
+            if (after != null)
+                query = (IOrderedQueryable<Expense>)query.Where(m => m.CreatedAt > after);
+
+            var list = await query.ToListAsync();
 
             return Ok(list);
         }

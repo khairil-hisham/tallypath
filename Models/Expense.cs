@@ -9,7 +9,8 @@ namespace Tallypath.Models
         public Group Group { get; set; } = default!;
         public User Creator { get; set; } = default!;
 
-        public string Content { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public long Amount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
