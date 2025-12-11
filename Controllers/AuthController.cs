@@ -69,7 +69,6 @@ namespace Tallypath.Controllers
             {
                 Name = "Personal Spending",
                 Members = new List<GroupMember>(),
-                Personal = true,
             };
 
             group.Members.Add(new GroupMember

@@ -24,26 +24,47 @@ namespace Tallypath.Controllers
         {
             var userId = User.GetUserId();
 
-            // Check membership
+            // 1. Ensure group exists
+            var group = await _db.Groups.FindAsync(dto.GroupId);
+            if (group == null)
+                return NotFound("Group not found.");
+
+            // 2. Ensure user is a member of this group
             bool isMember = await _db.GroupMembers
                 .AnyAsync(m => m.GroupId == dto.GroupId && m.UserId == userId);
 
             if (!isMember)
                 return Forbid();
 
+            // 3. Create expense
             var exp = new Expense
             {
                 GroupId = dto.GroupId,
                 Title = dto.Title,
                 CreatorId = userId,
-                Amount = dto.Amount
+                Amount = dto.Amount,
+                CreatedAt = DateTime.UtcNow // if your model includes this
             };
 
             _db.Expenses.Add(exp);
+
+            // 4. Update group total if your Group has a Total property
+            group.Total += dto.Amount;
+
+            // 5. Save
             await _db.SaveChangesAsync();
 
-            return Ok(exp);
+            // 6. Return with the new data
+            return Ok(new ExpenseDto
+            {
+                Id = exp.Id,
+                GroupId = exp.GroupId,
+                Amount = exp.Amount,
+                Title = exp.Title,
+                CreatedAt = exp.CreatedAt
+            });
         }
+
 
         [HttpGet("group/{groupId}")]
         public async Task<IActionResult> GetExpenses(Guid groupId, DateTime? before, int limit = 50)

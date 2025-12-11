@@ -10,7 +10,7 @@ namespace Tallypath.Data
     {
         public Guid GroupId { get; set; }
         public string Name { get; set; } = default!;
-        public bool Personal { get; set; } = false;
+        public long Total { get; set; } = 0;
 
         public MembershipDto Membership { get; set; } = default!;
     }

@@ -193,7 +193,7 @@ namespace Tallypath.Controllers
                 {
                     GroupId = gm.Group.Id,
                     Name = gm.Group.Name,
-                    Personal = gm.Group.Personal,
+                    Total = gm.Group.Total,
 
                     Membership = new MembershipDto
                     {
