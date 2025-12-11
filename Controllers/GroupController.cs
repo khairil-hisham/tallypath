@@ -188,6 +188,7 @@ namespace Tallypath.Controllers
             var groups = await _context.GroupMembers
                 .Where(gm => gm.UserId == User.GetUserId())
                 .Include(gm => gm.Group)
+                .OrderBy(gm => gm.JoinedAt)
                 .Select(gm => new GroupWithMembershipDto
                 {
                     GroupId = gm.Group.Id,
