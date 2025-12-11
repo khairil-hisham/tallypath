@@ -181,6 +181,31 @@ namespace Tallypath.Controllers
             return Ok("Invite revoked.");
         }
 
+        [Authorize]
+        [HttpGet("user")]
+        public async Task<ActionResult<IEnumerable<GroupWithMembershipDto>>> GetGroupsForUser()
+        {
+            var groups = await _context.GroupMembers
+                .Where(gm => gm.UserId == User.GetUserId())
+                .Include(gm => gm.Group)
+                .Select(gm => new GroupWithMembershipDto
+                {
+                    GroupId = gm.Group.Id,
+                    Name = gm.Group.Name,
+                    Personal = gm.Group.Personal,
+
+                    Membership = new MembershipDto
+                    {
+                        MemberId = gm.Id,
+                        JoinedAt = gm.JoinedAt,
+                        IsAdmin = gm.IsAdmin
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(groups);
+        }
+
     }
 
 }

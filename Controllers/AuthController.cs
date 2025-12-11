@@ -65,6 +65,22 @@ namespace Tallypath.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            var group = new Group
+            {
+                Name = "Personal Spending",
+                Members = new List<GroupMember>(),
+                Personal = true,
+            };
+
+            group.Members.Add(new GroupMember
+            {
+                UserId = user.Id,
+                IsAdmin = true,
+            });
+
+            _context.Groups.Add(group);
+            await _context.SaveChangesAsync();
+
             return Ok("User registered successfully");
         }
 

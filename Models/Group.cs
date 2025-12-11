@@ -8,19 +8,7 @@ namespace Tallypath.Models
 
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
-    }
-    public class GroupInvite
-    {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        public Guid GroupId { get; set; } = default!;
-        public Group Group { get; set; } = default!;
-
-        public DateTime ExpiresAt { get; set; }
-        public int MaxUses { get; set; } = 1;  // optional
-        public int Uses { get; set; } = 0;
-
-        public bool IsRevoked { get; set; } = false;
+        public bool Personal { get; set; } = false;
     }
 
 
@@ -36,6 +24,20 @@ namespace Tallypath.Models
 
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         public bool IsAdmin { get; set; } = false;
+    }
+
+    public class GroupInvite
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+
+        public Guid GroupId { get; set; } = default!;
+        public Group Group { get; set; } = default!;
+
+        public DateTime ExpiresAt { get; set; }
+        public int MaxUses { get; set; } = 1;  // optional
+        public int Uses { get; set; } = 0;
+
+        public bool IsRevoked { get; set; } = false;
     }
 
 

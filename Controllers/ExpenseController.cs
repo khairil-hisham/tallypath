@@ -58,7 +58,7 @@ namespace Tallypath.Controllers
 
             var query = _db.Expenses
                 .Where(m => m.GroupId == groupId)
-                .OrderByDescending(m => m.CreatedAt);//latest [0] to oldest [n]
+                .OrderBy(m => m.CreatedAt);//latest [0] to oldest [n]
 
             if (before != null)
                 query = (IOrderedQueryable<Expense>)query.Where(m => m.CreatedAt < before);
