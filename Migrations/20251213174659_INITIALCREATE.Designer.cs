@@ -12,8 +12,8 @@ using Tallypath.Data;
 namespace tallypath.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251204135351_RESETAGAIN")]
-    partial class RESETAGAIN
+    [Migration("20251213174659_INITIALCREATE")]
+    partial class INITIALCREATE
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,9 +31,8 @@ namespace tallypath.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -44,6 +43,13 @@ namespace tallypath.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("PaidBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
@@ -51,6 +57,24 @@ namespace tallypath.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("Tallypath.Models.ExpenseSplit", b =>
+                {
+                    b.Property<Guid>("ExpenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Share")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ExpenseId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ExpenseSplit");
                 });
 
             modelBuilder.Entity("Tallypath.Models.Group", b =>
@@ -62,6 +86,9 @@ namespace tallypath.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long>("Total")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -178,6 +205,21 @@ namespace tallypath.Migrations
                     b.Navigation("Group");
                 });
 
+            modelBuilder.Entity("Tallypath.Models.ExpenseSplit", b =>
+                {
+                    b.HasOne("Tallypath.Models.Expense", null)
+                        .WithMany("Splits")
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tallypath.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Tallypath.Models.GroupInvite", b =>
                 {
                     b.HasOne("Tallypath.Models.Group", "Group")
@@ -206,6 +248,11 @@ namespace tallypath.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Tallypath.Models.Expense", b =>
+                {
+                    b.Navigation("Splits");
                 });
 
             modelBuilder.Entity("Tallypath.Models.Group", b =>

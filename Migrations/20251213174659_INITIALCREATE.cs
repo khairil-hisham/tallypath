@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace tallypath.Migrations
 {
     /// <inheritdoc />
-    public partial class RESETAGAIN : Migration
+    public partial class INITIALCREATE : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,8 @@ namespace tallypath.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Total = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,8 +70,10 @@ namespace tallypath.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
                     GroupId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Amount = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PaidBy = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -116,6 +119,31 @@ namespace tallypath.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ExpenseSplit",
+                columns: table => new
+                {
+                    ExpenseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Share = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExpenseSplit", x => new { x.ExpenseId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_ExpenseSplit_Expenses_ExpenseId",
+                        column: x => x.ExpenseId,
+                        principalTable: "Expenses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExpenseSplit_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Expenses_CreatorId",
                 table: "Expenses",
@@ -125,6 +153,11 @@ namespace tallypath.Migrations
                 name: "IX_Expenses_GroupId",
                 table: "Expenses",
                 column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExpenseSplit_UserId",
+                table: "ExpenseSplit",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupInvites_GroupId",
@@ -147,13 +180,16 @@ namespace tallypath.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Expenses");
+                name: "ExpenseSplit");
 
             migrationBuilder.DropTable(
                 name: "GroupInvites");
 
             migrationBuilder.DropTable(
                 name: "GroupMembers");
+
+            migrationBuilder.DropTable(
+                name: "Expenses");
 
             migrationBuilder.DropTable(
                 name: "Groups");

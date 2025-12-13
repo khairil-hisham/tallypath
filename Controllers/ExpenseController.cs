@@ -36,22 +36,25 @@ namespace Tallypath.Controllers
             if (!isMember)
                 return Forbid();
 
-            // 3. Create expense
+
             var exp = new Expense
             {
                 GroupId = dto.GroupId,
                 Title = dto.Title,
                 CreatorId = userId,
                 Amount = dto.Amount,
-                CreatedAt = DateTime.UtcNow // if your model includes this
+                CreatedAt = DateTime.UtcNow,
+                Splits = [.. dto.Splits.Select(s => new ExpenseSplit{
+                    UserId = s.UserId,
+                    Share = s.Share
+                })],
+                PaidBy = dto.PaidBy
             };
 
             _db.Expenses.Add(exp);
 
-            // 4. Update group total if your Group has a Total property
             group.Total += dto.Amount;
 
-            // 5. Save
             await _db.SaveChangesAsync();
 
             // 6. Return with the new data
@@ -61,7 +64,9 @@ namespace Tallypath.Controllers
                 GroupId = exp.GroupId,
                 Amount = exp.Amount,
                 Title = exp.Title,
-                CreatedAt = exp.CreatedAt
+                CreatedAt = exp.CreatedAt,
+                Splits = dto.Splits,
+                PaidBy = dto.PaidBy
             });
         }
 

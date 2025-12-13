@@ -25,6 +25,23 @@ namespace Tallypath.Data
                 .WithMany(u => u.Expenses)
                 .HasForeignKey(m => m.CreatorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExpenseSplit>(entity =>
+                {
+                entity.HasKey(es => new { es.ExpenseId, es.UserId });
+
+                entity.Property(es => es.Share)
+                    .IsRequired();
+
+                entity.HasOne<Expense>()
+                    .WithMany(e => e.Splits)
+                    .HasForeignKey(es => es.ExpenseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(es => es.UserId);
+                });
         }
     }
 }
