@@ -5,12 +5,14 @@ namespace Tallypath.Data
 {
     public class AppDbContext : DbContext
     {
+  
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<User> Users => Set<User>();
         public DbSet<Group> Groups => Set<Group>();
         public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
         public DbSet<Expense> Expenses => Set<Expense>();
         public DbSet<GroupInvite> GroupInvites=> Set<GroupInvite>();
+        public DbSet<UserBalance> UserBalances => Set<UserBalance>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,20 +30,24 @@ namespace Tallypath.Data
 
             modelBuilder.Entity<ExpenseSplit>(entity =>
                 {
-                entity.HasKey(es => new { es.ExpenseId, es.UserId });
+                    entity.HasKey(es => new { es.ExpenseId, es.UserId });
 
-                entity.Property(es => es.Share)
-                    .IsRequired();
+                    entity.Property(es => es.Share)
+                        .IsRequired();
 
-                entity.HasOne<Expense>()
-                    .WithMany(e => e.Splits)
-                    .HasForeignKey(es => es.ExpenseId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    entity.HasOne<Expense>()
+                        .WithMany(e => e.Splits)
+                        .HasForeignKey(es => es.ExpenseId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne<User>()
-                    .WithMany()
-                    .HasForeignKey(es => es.UserId);
-                });
+                    entity.HasOne<User>()
+                        .WithMany()
+                        .HasForeignKey(es => es.UserId);
+                }
+            );
+
+            modelBuilder.Entity<UserBalance>().HasNoKey();
+
         }
     }
 }

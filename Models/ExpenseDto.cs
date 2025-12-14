@@ -17,7 +17,7 @@ namespace Tallypath.Data
         public decimal Amount { get; set; }
         public string Title { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-        
+
         public List<ExpenseSplitDto> Splits { get; set; } = [];
         public Guid PaidBy { get; set; }
     }
@@ -26,5 +26,17 @@ namespace Tallypath.Data
     {
         public Guid UserId { get; set; }
         public long Share { get; set; }
+    }
+
+    public class BalanceDto
+    {
+        public List<Debt> Debts = [];
+    }
+
+    public class Debt
+    {
+        public Guid Debtor { get; set; }
+        public Guid Creditor { get; set; }
+        public long Amount { get; set; }
     }
 }

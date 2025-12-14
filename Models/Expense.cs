@@ -12,7 +12,7 @@ namespace Tallypath.Models
         public string Title { get; set; } = string.Empty;
         public long Amount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public List<ExpenseSplit> Splits { get; set; } = [];
+        public ICollection<ExpenseSplit> Splits{ get; set; } = new List<ExpenseSplit>();
         public Guid PaidBy { get; set; } = default!;
     }
     public class ExpenseSplit
@@ -21,4 +21,11 @@ namespace Tallypath.Models
         public Guid UserId { get; set; }
         public long Share { get; set; }
     }
+
+    public class UserBalance
+    {
+        public Guid UserId { get; set; }
+        public long NetBalance { get; set; }
+    }
+
 }

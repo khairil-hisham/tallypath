@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Tallypath.Data;
 using Tallypath.Models;
 
@@ -11,8 +12,9 @@ namespace Tallypath.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
+    
         private readonly AppDbContext _db;
-
+        
         public ExpensesController(AppDbContext db)
         {
             _db = db;
@@ -83,6 +85,7 @@ namespace Tallypath.Controllers
                 return Forbid();
 
             var query = _db.Expenses
+                .Include(e => e.Splits)
                 .Where(m => m.GroupId == groupId)
                 .OrderByDescending(m => m.CreatedAt);//latest [0] to oldest [n]
 
@@ -106,6 +109,7 @@ namespace Tallypath.Controllers
                 return Forbid();
 
             var query = _db.Expenses
+                .Include(e => e.Splits)
                 .Where(m => m.GroupId == groupId)
                 .OrderByDescending(m => m.CreatedAt);//latest [0] to oldest [n]
 
@@ -129,6 +133,89 @@ namespace Tallypath.Controllers
                 .ToListAsync();
 
             return Ok(expenses);
+        }
+
+        [HttpGet("balance/{groupId}")]
+        public async Task<IActionResult> GetBalance(Guid groupId)
+        {
+            string sqlString =
+            """
+                SELECT
+                    es."UserId",
+                    SUM(
+                        CASE
+                            WHEN e."PaidBy" = es."UserId" THEN e."Amount"
+                            ELSE es."Share" * -1
+                        END
+                    ) AS "NetBalance"
+                FROM "ExpenseSplit" es
+                JOIN "Expenses" e ON e."Id" = es."ExpenseId"
+                WHERE e."GroupId" = :groupId
+                GROUP BY es."UserId";
+            """;
+
+            var balances = await _db.UserBalances.FromSqlRaw(sqlString, new NpgsqlParameter("groupId", groupId)).ToListAsync();
+            var creditors = balances
+                .Where(b => b.NetBalance > 0)
+                .Select(b => new UserBalance
+                {
+                    UserId = b.UserId,
+                    NetBalance = b.NetBalance
+                })
+                .OrderByDescending(b => b.NetBalance)
+                .ToList();
+
+            var debtors = balances
+                .Where(b => b.NetBalance < 0)
+                .Select(b => new UserBalance
+                {
+                    UserId = b.UserId,
+                    NetBalance = b.NetBalance
+                })
+                .OrderBy(b => b.NetBalance)
+                .ToList();
+
+
+            Console.WriteLine("Creditors:");
+            var results = new List<Debt>();
+            foreach (var person in creditors)
+            {
+                Console.WriteLine(person.UserId);
+                Console.WriteLine(person.NetBalance);
+            }
+            Console.WriteLine("Debtors:");
+            foreach (var person in debtors)
+            {
+                Console.WriteLine(person.UserId);
+                Console.WriteLine(person.NetBalance);
+            }
+
+            int i = 0, j = 0;
+            while (i < debtors.Count && j < creditors.Count)
+            {
+
+                var debtor = debtors[i];
+                var creditor = creditors[j];
+
+                var amount = Math.Min(-debtor.NetBalance, creditor.NetBalance);
+
+                results.Add(new Debt
+                {
+                    Debtor = debtor.UserId,
+                    Creditor = creditor.UserId,
+                    Amount = amount
+                });
+
+                debtor.NetBalance += amount;
+                creditor.NetBalance -= amount;
+
+                if (debtor.NetBalance == 0) i++;
+                if (creditor.NetBalance == 0) j++;
+            }
+
+
+            return Ok(results);
+
         }
 
     }
