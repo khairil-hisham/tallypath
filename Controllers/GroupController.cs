@@ -183,24 +183,20 @@ namespace Tallypath.Controllers
 
         [Authorize]
         [HttpGet("user")]
-        public async Task<ActionResult<IEnumerable<GroupWithMembershipDto>>> GetGroupsForUser()
+        public async Task<ActionResult<IEnumerable<GroupWithMembersDto>>> GetGroupsForUser()
         {
             var groups = await _context.GroupMembers
                 .Where(gm => gm.UserId == User.GetUserId())
                 .Include(gm => gm.Group)
+                .Include(gm=> gm.Group.Members)
                 .OrderBy(gm => gm.JoinedAt)
-                .Select(gm => new GroupWithMembershipDto
+                .Select(gm => new GroupWithMembersDto
                 {
                     GroupId = gm.Group.Id,
                     Name = gm.Group.Name,
                     Total = gm.Group.Total,
+                    Members = gm.Group.Members.ToList(),
 
-                    Membership = new MembershipDto
-                    {
-                        MemberId = gm.Id,
-                        JoinedAt = gm.JoinedAt,
-                        IsAdmin = gm.IsAdmin
-                    }
                 })
                 .ToListAsync();
 
