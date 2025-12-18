@@ -75,12 +75,13 @@ namespace Tallypath.Controllers
 
 
             // 4. Add other group members
-            foreach (var userId in request.MemberIds)
+            foreach (var user in users)
             {
                 group.Members.Add(new GroupMember
                 {
-                    UserId = userId,
-                    IsAdmin = (userId == request.MemberIds[0]) ? true : false //first ID is admin
+                    UserId = user.Id,
+                    IsAdmin = (user.Id == request.MemberIds[0]) ? true : false, //first ID is admin
+                    NameInGroup = user.Fullname
                 });
             }
 
@@ -109,7 +110,8 @@ namespace Tallypath.Controllers
                 Members = group.Members.Select(m => m.UserId).ToList(),
                 inviteCode = invite.Id,
                 deepLink = link,
-                expiresAt = invite.ExpiresAt
+                expiresAt = invite.ExpiresAt,
+                NameInGroup = group.Members.Select(m=>m.NameInGroup).ToList(),
             });
         }
 
@@ -143,7 +145,8 @@ namespace Tallypath.Controllers
             invite.Group.Members.Add(new GroupMember
             {
                 GroupId = invite.GroupId,
-                UserId = userId
+                UserId = userId,
+                NameInGroup = User.GetName()
             });
 
             invite.Uses += 1;
@@ -154,7 +157,8 @@ namespace Tallypath.Controllers
             {
                 message = "Joined group successfully",
                 groupId = invite.GroupId,
-                groupName = invite.Group.Name
+                groupName = invite.Group.Name,
+                nameInGroup = User.GetName()
             });
         }
 
@@ -188,7 +192,7 @@ namespace Tallypath.Controllers
             var groups = await _context.GroupMembers
                 .Where(gm => gm.UserId == User.GetUserId())
                 .Include(gm => gm.Group)
-                .Include(gm=> gm.Group.Members)
+                .Include(gm => gm.Group.Members)
                 .OrderBy(gm => gm.JoinedAt)
                 .Select(gm => new GroupWithMembersDto
                 {

@@ -21,6 +21,7 @@ namespace Tallypath.Models
 
         public Guid UserId { get; set; }
         public User User { get; set; } = default!;
+        public string NameInGroup { get; set; } = default!;
 
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         public bool IsAdmin { get; set; } = false;

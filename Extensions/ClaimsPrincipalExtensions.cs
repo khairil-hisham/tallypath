@@ -7,4 +7,8 @@ public static class ClaimsPrincipalExtensions
         var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.Parse(id);
     }
+    public static string GetName(this ClaimsPrincipal user)
+    {
+        return user.FindFirst("fullname")?.Value ?? "null";
+    }
 }
