@@ -140,18 +140,33 @@ namespace Tallypath.Controllers
         {
             string sqlString =
             """
+                WITH credits AS (
+                    SELECT
+                        e."PaidBy" AS "UserId",
+                        SUM(e."Amount") AS balance
+                    FROM "Expenses" e
+                    WHERE e."GroupId" = :groupId
+                    GROUP BY e."PaidBy"
+                ),
+                debits AS (
+                    SELECT
+                        es."UserId",
+                        -SUM(es."Share") AS balance
+                    FROM "ExpenseSplit" es
+                    JOIN "Expenses" e ON e."Id" = es."ExpenseId"
+                    WHERE e."GroupId" = :groupId
+                    GROUP BY es."UserId"
+                )
                 SELECT
-                    es."UserId",
-                    SUM(
-                        CASE
-                            WHEN e."PaidBy" = es."UserId" THEN e."Amount"
-                            ELSE es."Share" * -1
-                        END
-                    ) AS "NetBalance"
-                FROM "ExpenseSplit" es
-                JOIN "Expenses" e ON e."Id" = es."ExpenseId"
-                WHERE e."GroupId" = :groupId
-                GROUP BY es."UserId";
+                    "UserId",
+                    SUM(balance) AS "NetBalance"
+                FROM (
+                    SELECT * FROM credits
+                    UNION ALL
+                    SELECT * FROM debits
+                ) t
+                GROUP BY "UserId";
+
             """;
 
             var balances = await _db.UserBalances.FromSqlRaw(sqlString, new NpgsqlParameter("groupId", groupId)).ToListAsync();
@@ -176,19 +191,7 @@ namespace Tallypath.Controllers
                 .ToList();
 
 
-            Console.WriteLine("Creditors:");
             var results = new List<Debt>();
-            foreach (var person in creditors)
-            {
-                Console.WriteLine(person.UserId);
-                Console.WriteLine(person.NetBalance);
-            }
-            Console.WriteLine("Debtors:");
-            foreach (var person in debtors)
-            {
-                Console.WriteLine(person.UserId);
-                Console.WriteLine(person.NetBalance);
-            }
 
             int i = 0, j = 0;
             while (i < debtors.Count && j < creditors.Count)
