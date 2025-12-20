@@ -75,6 +75,7 @@ namespace Tallypath.Controllers
             {
                 UserId = user.Id,
                 IsAdmin = true,
+                NameInGroup = user.Fullname,
             });
 
             _context.Groups.Add(group);
