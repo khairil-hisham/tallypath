@@ -13,6 +13,7 @@ namespace Tallypath.Data
         public DbSet<Expense> Expenses => Set<Expense>();
         public DbSet<GroupInvite> GroupInvites=> Set<GroupInvite>();
         public DbSet<UserBalance> UserBalances => Set<UserBalance>();
+        public DbSet<Savings> SavingPlans => Set<Savings>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
