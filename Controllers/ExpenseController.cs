@@ -50,7 +50,8 @@ namespace Tallypath.Controllers
                     UserId = s.UserId,
                     Share = s.Share
                 })],
-                PaidBy = dto.PaidBy
+                PaidBy = dto.PaidBy,
+                IsMessage = dto.IsMessage
             };
 
             _db.Expenses.Add(exp);
@@ -68,7 +69,8 @@ namespace Tallypath.Controllers
                 Title = exp.Title,
                 CreatedAt = exp.CreatedAt,
                 Splits = dto.Splits,
-                PaidBy = dto.PaidBy
+                PaidBy = dto.PaidBy,
+                IsMessage = dto.IsMessage
             });
         }
 

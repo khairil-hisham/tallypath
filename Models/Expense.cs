@@ -12,8 +12,10 @@ namespace Tallypath.Models
         public string Title { get; set; } = string.Empty;
         public long Amount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public ICollection<ExpenseSplit> Splits{ get; set; } = new List<ExpenseSplit>();
+        public ICollection<ExpenseSplit> Splits { get; set; } = new List<ExpenseSplit>();
         public Guid PaidBy { get; set; } = default!;
+
+        public bool IsMessage { get; set; } = false;
     }
     public class ExpenseSplit
     {
