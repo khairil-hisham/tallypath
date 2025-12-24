@@ -14,6 +14,7 @@ namespace Tallypath.Data
         public DbSet<GroupInvite> GroupInvites=> Set<GroupInvite>();
         public DbSet<UserBalance> UserBalances => Set<UserBalance>();
         public DbSet<Savings> SavingPlans => Set<Savings>();
+        public DbSet<Contribution> Contributions => Set<Contribution>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +49,9 @@ namespace Tallypath.Data
             );
 
             modelBuilder.Entity<UserBalance>().HasNoKey();
+
+            modelBuilder.Entity<Contribution>()
+                .HasIndex(c => new { c.SavingsId, c.CreatedAt });
 
         }
     }

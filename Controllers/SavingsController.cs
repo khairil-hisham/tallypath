@@ -28,7 +28,7 @@ namespace Tallypath.Controllers
 
             return Ok(plans);
         }
-        
+
 
         [Authorize]
         [HttpPost("create")]
@@ -56,6 +56,52 @@ namespace Tallypath.Controllers
 
             // 6. Return new group info
             return Ok("Plan created successfully");
+        }
+
+        [Authorize]
+        [HttpPost("contribution/create/{savingsId}")]
+        public async Task<IActionResult> CreatePlan([FromBody] CreateContributionRequest request, Guid savingsId)
+        {
+            var savingsExists = await _db.SavingPlans
+                .AnyAsync(s => s.Id == savingsId);
+
+            if (!savingsExists)
+                return NotFound();
+
+            var userId = User.GetUserId();
+
+            _db.Contributions.Add(new Contribution
+            {
+                SavingsId = savingsId,
+                Note = request.Note,
+                Amount = request.Amount
+            });
+
+            var savings = await _db.SavingPlans
+                .FirstAsync(s => s.Id == savingsId);
+
+            savings.Current += request.Amount;
+
+            await _db.SaveChangesAsync();
+
+            return Ok("Contribution created successfully");
+        }
+
+        [Authorize]
+        [HttpGet("contribution/{savingsId}")]
+        public async Task<IActionResult> GetSavingsContribution(Guid savingsId)
+        {
+
+            if (!await _db.SavingPlans.AnyAsync(s => s.Id == savingsId))
+                return NotFound();
+
+            var cons = await _db.Contributions
+                .AsNoTracking()
+                .Where(c => c.SavingsId == savingsId)
+                .OrderBy(c => c.CreatedAt)
+                .ToListAsync();
+
+            return Ok(cons);
         }
     }
 }
