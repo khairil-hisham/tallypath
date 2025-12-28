@@ -6,6 +6,7 @@ namespace Tallypath.Models
 
         public string Name { get; set; } = default!;
         public long Total { get; set; } = 0;
+        public DateTime? CreatedAt { get; set; }
 
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();

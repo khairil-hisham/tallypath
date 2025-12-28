@@ -20,6 +20,10 @@ namespace Tallypath.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Group>()
+                .Property(e => e.CreatedAt)
+                .HasDefaultValueSql("timezone('utc', now())");
+
             modelBuilder.Entity<GroupMember>()
                 .HasIndex(gm => new { gm.GroupId, gm.UserId })
                 .IsUnique(); // user's membership in a group cannot repeat

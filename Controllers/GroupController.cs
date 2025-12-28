@@ -111,7 +111,7 @@ namespace Tallypath.Controllers
                 inviteCode = invite.Id,
                 deepLink = link,
                 expiresAt = invite.ExpiresAt,
-                NameInGroup = group.Members.Select(m=>m.NameInGroup).ToList(),
+                NameInGroup = group.Members.Select(m => m.NameInGroup).ToList(),
             });
         }
 
@@ -207,6 +207,29 @@ namespace Tallypath.Controllers
             return Ok(groups);
         }
 
+
+        [HttpGet("{groupId}/details")]
+        public async Task<IActionResult> GetGroupDetails(Guid groupId)
+        {
+            var details = await _context.Groups
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (details == null)
+                return NotFound("Group Id not found");
+
+            var count = await _context.GroupMembers
+                .CountAsync(gm => gm.GroupId == groupId);
+
+            return Ok(new
+            {
+                name = details.Name,
+                memberCount = count,
+                createdAt = details.CreatedAt
+            });
+
+        }
+
     }
+
 
 }
