@@ -278,7 +278,7 @@ namespace Tallypath.Controllers
                 };
             });
 
-            return Ok(results);
+            return Ok(mapped);
         }
 
     }
