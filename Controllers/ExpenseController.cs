@@ -5,6 +5,7 @@ using Npgsql;
 using Tallypath.Data;
 using Tallypath.Models;
 
+
 namespace Tallypath.Controllers
 {
     [Authorize]
@@ -12,9 +13,9 @@ namespace Tallypath.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
-    
+
         private readonly AppDbContext _db;
-        
+
         public ExpensesController(AppDbContext db)
         {
             _db = db;
@@ -221,6 +222,63 @@ namespace Tallypath.Controllers
 
             return Ok(results);
 
+        }
+
+        [Authorize]
+        [HttpGet("total/daily")]
+        public async Task<IActionResult> GetDailySpending(int days = 30)
+        {
+            var userId = User.GetUserId();
+
+            var results = await _db.DailyTotals
+                .FromSqlRaw("""
+                    WITH bounds AS (
+                        SELECT
+                            date_trunc(
+                                'day',
+                                timezone('Asia/Kuala_Lumpur', now())
+                            ) - INTERVAL '29 days' AS local_start,
+                            date_trunc(
+                                'day',
+                                timezone('Asia/Kuala_Lumpur', now())
+                            ) + INTERVAL '1 day' AS local_end
+                    )
+                    SELECT
+                        date_trunc(
+                            'day',
+                            e."CreatedAt"
+                        ) AS "Date",
+                        SUM(es."Share") AS "Amount"
+                    FROM "ExpenseSplit" es
+                    JOIN "Expenses" e ON e."Id" = es."ExpenseId"
+                    CROSS JOIN bounds b
+                    WHERE
+                        (e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur')
+                            >= b.local_start
+                    AND
+                        (e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur')
+                            < b.local_end
+                    AND es."UserId" = :userID
+                    GROUP BY 1
+                    ORDER BY 1;
+
+                """, new NpgsqlParameter("userId", userId))
+                .ToListAsync();
+
+            var fullRange = Enumerable.Range(0, days)
+                .Select(i => DateTime.Today.AddDays(-days + i));
+
+            var mapped = fullRange.Select(d =>
+            {
+                var item = results.FirstOrDefault(r => r.Date.Date == d);
+                return new
+                {
+                    Date = d,
+                    Amount = item?.Amount?? 0
+                };
+            });
+
+            return Ok(results);
         }
 
     }

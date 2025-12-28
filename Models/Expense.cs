@@ -30,4 +30,10 @@ namespace Tallypath.Models
         public long NetBalance { get; set; }
     }
 
+    public class DailyTotal
+    {
+        public DateTime Date { get; set; } = default!;
+        public long Amount { get; set; } = 0;
+    }
+
 }
