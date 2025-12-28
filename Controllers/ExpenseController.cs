@@ -230,23 +230,24 @@ namespace Tallypath.Controllers
         {
             var userId = User.GetUserId();
 
+
             var results = await _db.DailyTotals
                 .FromSqlRaw("""
                     WITH bounds AS (
                         SELECT
                             date_trunc(
                                 'day',
-                                timezone('Asia/Kuala_Lumpur', now())
+                                (now() AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Kuala_Lumpur'
                             ) - INTERVAL '29 days' AS local_start,
                             date_trunc(
                                 'day',
-                                timezone('Asia/Kuala_Lumpur', now())
+                                (now() AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Kuala_Lumpur'
                             ) + INTERVAL '1 day' AS local_end
                     )
                     SELECT
                         date_trunc(
                             'day',
-                            e."CreatedAt"
+                            e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur'
                         ) AS "Date",
                         SUM(es."Share") AS "Amount"
                     FROM "ExpenseSplit" es
@@ -258,7 +259,7 @@ namespace Tallypath.Controllers
                     AND
                         (e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur')
                             < b.local_end
-                    AND es."UserId" = :userID
+                    AND es."UserId" = :userId
                     GROUP BY 1
                     ORDER BY 1;
 
