@@ -265,20 +265,7 @@ namespace Tallypath.Controllers
                 """, new NpgsqlParameter("userId", userId))
                 .ToListAsync();
 
-            var fullRange = Enumerable.Range(0, days)
-                .Select(i => DateTime.Today.AddDays(-days + i));
-
-            var mapped = fullRange.Select(d =>
-            {
-                var item = results.FirstOrDefault(r => r.Date.Date == d);
-                return new
-                {
-                    Date = d,
-                    Amount = item?.Amount?? 0
-                };
-            });
-
-            return Ok(mapped);
+            return Ok(results);
         }
 
     }
