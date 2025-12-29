@@ -13,7 +13,7 @@ namespace Tallypath.Data
         public DbSet<Expense> Expenses => Set<Expense>();
         public DbSet<GroupInvite> GroupInvites => Set<GroupInvite>();
         public DbSet<UserBalance> UserBalances => Set<UserBalance>();
-        public DbSet<DailyTotal> DailyTotals => Set<DailyTotal>();
+        public DbSet<DailyTotalDto> DailyTotals => Set<DailyTotalDto>();
         public DbSet<Savings> SavingPlans => Set<Savings>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
 
@@ -54,7 +54,7 @@ namespace Tallypath.Data
             );
 
             modelBuilder.Entity<UserBalance>().HasNoKey();
-            modelBuilder.Entity<DailyTotal>().HasNoKey();
+            modelBuilder.Entity<DailyTotalDto>().HasNoKey();
 
             modelBuilder.Entity<Contribution>()
                 .HasIndex(c => new { c.SavingsId, c.CreatedAt });

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Tallypath.Models
 {
     public class Expense
@@ -30,7 +32,8 @@ namespace Tallypath.Models
         public long NetBalance { get; set; }
     }
 
-    public class DailyTotal
+    [Keyless]
+    public class DailyTotalDto
     {
         public DateTime Date { get; set; } = default!;
         public long Amount { get; set; } = 0;

@@ -1,3 +1,5 @@
+using System;
+
 namespace Tallypath.Data
 {
     public class CreateExpenseDto
@@ -41,4 +43,6 @@ namespace Tallypath.Data
         public Guid Creditor { get; set; }
         public long Amount { get; set; }
     }
+
+    public record DailyExpenseRequest(DateTime StartOfDayUtc);
 }

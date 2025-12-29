@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Tallypath.Data;
 using Tallypath.Models;
+using System.Data;
 
 
 namespace Tallypath.Controllers
@@ -224,50 +225,42 @@ namespace Tallypath.Controllers
 
         }
 
-        [Authorize]
-        [HttpGet("total/daily")]
-        public async Task<IActionResult> GetDailySpending(int days = 30)
+        [HttpPost("total/daily")]
+        public async Task<ActionResult<List<DailyTotalDto>>> GetLast30DaysTotalRaw([FromBody] DailyExpenseRequest request)
         {
-            var userId = User.GetUserId();
+            var startUtc = DateTime.SpecifyKind(request.StartOfDayUtc, DateTimeKind.Utc);
 
-
-            var results = await _db.DailyTotals
+            var results = await _db.Set<DailyTotalDto>()
                 .FromSqlRaw("""
-                    WITH bounds AS (
-                        SELECT
-                            date_trunc(
-                                'day',
-                                (now() AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Kuala_Lumpur'
-                            ) - INTERVAL '29 days' AS local_start,
-                            date_trunc(
-                                'day',
-                                (now() AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Kuala_Lumpur'
-                            ) + INTERVAL '1 day' AS local_end
-                    )
-                    SELECT
-                        date_trunc(
-                            'day',
-                            e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur'
-                        ) AS "Date",
-                        SUM(es."Share") AS "Amount"
-                    FROM "ExpenseSplit" es
-                    JOIN "Expenses" e ON e."Id" = es."ExpenseId"
-                    CROSS JOIN bounds b
-                    WHERE
-                        (e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur')
-                            >= b.local_start
-                    AND
-                        (e."CreatedAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kuala_Lumpur')
-                            < b.local_end
-                    AND es."UserId" = :userId
-                    GROUP BY 1
-                    ORDER BY 1;
-
-                """, new NpgsqlParameter("userId", userId))
+            WITH bounds AS (
+                SELECT
+                    @startUtc::timestamptz AS start_utc,
+                    (@startUtc::timestamptz - INTERVAL '30 days') AS end_utc
+            )
+            SELECT
+                date_trunc('day', e."CreatedAt") AS "Date",
+                SUM(es."Share") AS "Amount"
+            FROM "ExpenseSplit" es
+            JOIN "Expenses" e ON e."Id" = es."ExpenseId"
+            CROSS JOIN bounds b
+            WHERE
+                e."CreatedAt" <= b.start_utc
+                AND e."CreatedAt" > b.end_utc
+                AND es."UserId" = @userId
+            GROUP BY 1
+            ORDER BY 1;
+            """,
+                    new NpgsqlParameter("startUtc", startUtc),
+                    new NpgsqlParameter("userId", User.GetUserId())
+                )
                 .ToListAsync();
 
+            Console.WriteLine(startUtc);
+            Console.WriteLine(User.GetUserId());
             return Ok(results);
         }
+
+
 
     }
 
