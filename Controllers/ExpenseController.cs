@@ -234,11 +234,11 @@ namespace Tallypath.Controllers
                 .FromSqlRaw("""
             WITH bounds AS (
                 SELECT
-                    @startUtc::timestamptz AS start_utc,
-                    (@startUtc::timestamptz - INTERVAL '30 days') AS end_utc
+                    (@startUtc::timestamptz + INTERVAL '1 day') AS start_utc,
+                    (@startUtc::timestamptz - INTERVAL '29 days') AS end_utc
             )
             SELECT
-                date_trunc('day', e."CreatedAt" AT TIME ZONE 'UTC') AS "Date",
+                date_trunc('day', e."CreatedAt" AT TIME ZONE 'UTC')  AT TIME ZONE 'Asia/Kuala_Lumpur' AS "Date",
                 SUM(es."Share") AS "Amount"
             FROM "ExpenseSplit" es
             JOIN "Expenses" e ON e."Id" = es."ExpenseId"
@@ -254,9 +254,6 @@ namespace Tallypath.Controllers
                     new NpgsqlParameter("userId", User.GetUserId())
                 )
                 .ToListAsync();
-
-            Console.WriteLine(startUtc);
-            Console.WriteLine(User.GetUserId());
             return Ok(results);
         }
 
