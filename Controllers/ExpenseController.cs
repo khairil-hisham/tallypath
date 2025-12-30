@@ -238,7 +238,7 @@ namespace Tallypath.Controllers
                     (@startUtc::timestamptz - INTERVAL '29 days') AS end_utc
             )
             SELECT
-                date_trunc('day', e."CreatedAt") AS "Date",
+                date_trunc('day', e."CreatedAt" AT TIME ZONE 'Asia/Kuala_Lumpur') AT TIME ZONE 'Asia/Kuala_Lumpur' AS "Date",
                 SUM(es."Share") AS "Amount"
             FROM "ExpenseSplit" es
             JOIN "Expenses" e ON e."Id" = es."ExpenseId"
