@@ -238,14 +238,14 @@ namespace Tallypath.Controllers
                     (@startUtc::timestamptz - INTERVAL '29 days') AS end_utc
             )
             SELECT
-                date_trunc('day', e."CreatedAt")  AT TIME ZONE 'Asia/Kuala_Lumpur' AS "Date",
+                date_trunc('day', e."CreatedAt" AT TIME ZONE 'UTC')  AT TIME ZONE 'UTC' AS "Date",
                 SUM(es."Share") AS "Amount"
             FROM "ExpenseSplit" es
             JOIN "Expenses" e ON e."Id" = es."ExpenseId"
             CROSS JOIN bounds b
             WHERE
-                (e."CreatedAt" AT TIME ZONE 'UTC') <= b.start_utc
-                AND (e."CreatedAt" AT TIME ZONE 'UTC') > b.end_utc
+                e."CreatedAt" <= b.start_utc
+                AND e."CreatedAt" > b.end_utc
                 AND es."UserId" = @userId
             GROUP BY 1
             ORDER BY 1;
