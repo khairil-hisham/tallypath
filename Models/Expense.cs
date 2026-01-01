@@ -18,6 +18,7 @@ namespace Tallypath.Models
         public Guid PaidBy { get; set; } = default!;
 
         public bool IsMessage { get; set; } = false;
+        public bool IsStatement { get; set; } = false;
     }
     public class ExpenseSplit
     {

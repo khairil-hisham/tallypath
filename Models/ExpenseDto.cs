@@ -11,6 +11,7 @@ namespace Tallypath.Data
         public List<ExpenseSplitDto> Splits { get; set; } = [];
         public Guid PaidBy { get; set; } = Guid.Empty;
         public bool IsMessage { get; set; } = false;
+        public bool IsStatement { get; set; } = false;
 
     }
     public class ExpenseDto
@@ -24,6 +25,7 @@ namespace Tallypath.Data
         public List<ExpenseSplitDto> Splits { get; set; } = [];
         public Guid PaidBy { get; set; }
         public bool IsMessage { get; set; }
+        public bool IsStatement { get; set; }
     }
 
     public class ExpenseSplitDto

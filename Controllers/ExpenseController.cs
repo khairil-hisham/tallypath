@@ -53,7 +53,8 @@ namespace Tallypath.Controllers
                     Share = s.Share
                 })],
                 PaidBy = dto.PaidBy,
-                IsMessage = dto.IsMessage
+                IsMessage = dto.IsMessage,
+                IsStatement = dto.IsStatement
             };
 
             _db.Expenses.Add(exp);
@@ -72,7 +73,8 @@ namespace Tallypath.Controllers
                 CreatedAt = exp.CreatedAt,
                 Splits = dto.Splits,
                 PaidBy = dto.PaidBy,
-                IsMessage = dto.IsMessage
+                IsMessage = dto.IsMessage,
+                IsStatement = dto.IsStatement
             });
         }
 
@@ -247,6 +249,7 @@ namespace Tallypath.Controllers
                 e."CreatedAt" <= b.start_utc
                 AND e."CreatedAt" > b.end_utc
                 AND es."UserId" = @userId
+                AND e."IsStatement" = false
             GROUP BY 1
             ORDER BY 1;
             """,
