@@ -48,6 +48,8 @@ namespace Tallypath.Controllers
                 Target = request.Target,
                 Due = request.Due,
                 CreatedAt = DateTime.UtcNow,
+                HasReminder = request.HasReminder,
+                Reminder = request.Reminder
             };
 
             // 5. Save to DB
@@ -74,7 +76,7 @@ namespace Tallypath.Controllers
             {
                 SavingsId = savingsId,
                 Note = request.Note,
-                Amount = request.Amount
+                Amount = request.Amount,
             });
 
             var savings = await _db.SavingPlans

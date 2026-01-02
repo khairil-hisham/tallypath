@@ -10,6 +10,8 @@ namespace Tallypath.Models
         public DateTime? Due { get; set; }
         public DateTime CreatedAt { get; set; }
         public ICollection<Contribution> Contributions { get; set; } = new List<Contribution>();
+        public bool HasReminder { get; set; } = false;
+        public string Reminder { get; set; } = default!;
     }
 
     public class Contribution
@@ -21,6 +23,7 @@ namespace Tallypath.Models
         public string Note { get; set; } = default!;
         public long Amount { get; set; } = default!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     }
 
 
