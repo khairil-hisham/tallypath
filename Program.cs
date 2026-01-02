@@ -5,6 +5,7 @@ using System.Text;
 using Tallypath.Data;
 using Tallypath.Models;
 using BCrypt.Net;
+using Tallypath.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+
+FirebaseService.Initialize();
+
+builder.Services.AddSingleton<PushNotificationService>();
+builder.Services.AddScoped<IUserDeviceService, UserDeviceService>();
 
 var app = builder.Build();
 

@@ -14,4 +14,5 @@ namespace Tallypath.Data
         public string Note { get; set; } = default!;
         public long Amount { get; set; } = default!;
     }
+
 }

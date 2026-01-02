@@ -16,6 +16,7 @@ namespace Tallypath.Data
         public DbSet<DailyTotalDto> DailyTotals => Set<DailyTotalDto>();
         public DbSet<Savings> SavingPlans => Set<Savings>();
         public DbSet<Contribution> Contributions => Set<Contribution>();
+        public DbSet<UserDevice> UserDevices => Set<UserDevice>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

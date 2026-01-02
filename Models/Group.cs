@@ -42,5 +42,13 @@ namespace Tallypath.Models
         public bool IsRevoked { get; set; } = false;
     }
 
+    public class GroupUnread
+    {
+        public Guid UserId { get; set; }
+        public Guid GroupId { get; set; }
+        public long UnreadCount { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
+    }
+
 
 }

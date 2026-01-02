@@ -15,4 +15,16 @@ namespace Tallypath.Data
         public string Identifier { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
+
+    public class RegisterDeviceRequest
+    {
+        public string DeviceId { get; set; } = null!;
+        public string Platform { get; set; } = null!;
+        public string FcmToken { get; set; } = null!;
+    }
+    public class DeactivateDeviceRequest
+    {
+        public string? DeviceId { get; set; }
+        public string? FcmToken { get; set; }
+    }
 }

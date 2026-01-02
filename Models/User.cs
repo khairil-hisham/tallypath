@@ -20,4 +20,18 @@ namespace Tallypath.Models
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 
     }
+    public class UserDevice
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+
+        public string DeviceId { get; set; } = null!;
+        public string Platform { get; set; } = null!; // android / ios / web
+        public string FcmToken { get; set; } = null!;
+
+        public bool IsActive { get; set; } = true;
+        public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
+    }
+
+
 }
