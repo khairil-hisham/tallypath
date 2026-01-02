@@ -5,6 +5,7 @@ using Npgsql;
 using Tallypath.Data;
 using Tallypath.Models;
 using System.Data;
+using FirebaseAdmin.Messaging;
 
 
 namespace Tallypath.Controllers
@@ -56,6 +57,50 @@ namespace Tallypath.Controllers
                 IsMessage = dto.IsMessage,
                 IsStatement = dto.IsStatement
             };
+
+
+            var tokens = await _db.UserDevices
+                .Where(t => _db.GroupMembers.Any(gm =>
+                    gm.GroupId == dto.GroupId &&
+                    gm.UserId == t.UserId &&
+                    gm.UserId != userId
+                ) && t.IsActive)
+                .Select(t=> t.FcmToken)
+                .ToListAsync();
+
+            var message = new MulticastMessage
+            {
+                Tokens = tokens,
+                Notification = new Notification
+                {
+                    Title = "Tallypath",
+                    Body = $"New in {group.Name}"
+                },
+                Android = new AndroidConfig
+                {
+                    // This will update existing notification with same tag
+                    Notification = new AndroidNotification
+                    {
+                        Tag = "unread_summary"
+                    }
+                },
+                Data = new Dictionary<string, string>
+                    {
+                        { "type", "unread_summary" },
+                        { "action", "open_group_screen" }
+                    }
+            };
+
+            if (tokens.Count != 0)
+            {
+
+                await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+
+            }
+            else
+            {
+                Console.WriteLine($"NO OTHER USER {message.ToString()}");
+            }
 
             _db.Expenses.Add(exp);
 
