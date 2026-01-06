@@ -73,15 +73,15 @@ namespace Tallypath.Controllers
                 Tokens = tokens,
                 Notification = new Notification
                 {
-                    Title = "Tallypath",
-                    Body = $"New in {group.Name}"
+                    Title = $"{group.Name}",
+                    Body = dto.IsMessage ? $"{dto.Title}" : $"RM{(dto.Amount/100).ToString()}: {dto.Title}"
                 },
                 Android = new AndroidConfig
                 {
                     // This will update existing notification with same tag
                     Notification = new AndroidNotification
                     {
-                        Tag = "unread_summary"
+                        Tag = $"{dto.GroupId}"
                     }
                 },
                 Data = new Dictionary<string, string>
